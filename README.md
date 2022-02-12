@@ -2,6 +2,8 @@
 
 A script for mixing all the room templates from all levels, into every single level file.
 
+I used python 3.10 for the scripts, idk much about compatibility between different python versions.
+
 ## Instructions
 - Create a folder named "Original" and move the level files, except camp files to preven't running out of short tilecodes
 
