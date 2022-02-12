@@ -1,7 +1,8 @@
 from os import mkdir, listdir
 from os.path import isfile
 import re
-sys.stdout = open("script-api.md", "w")
+import sys
+sys.stdout = open("log.txt", "w", encoding="latin-1")
 
 levels = [
     {
