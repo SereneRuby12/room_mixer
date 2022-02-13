@@ -118,7 +118,13 @@ tryMakeDir("./mixed")
 for index, value in templates.items():
     print(index)
 
+def fixTemplates():
+    templates["exit"][:] = [room for room in templates["exit"] if "8" in room or "9" in room]
+fixTemplates()
+
 for levelName, level in levels.items():
+    if levelName == "tiamat.lvl":
+        continue
     if not ("\\.chunk_air" in level):
         level += f"\n{templateSeparator}\n\\.chunk_air\n{templateSeparator}\n\n"
     if not ("\\.chunk_ground" in level):
@@ -130,3 +136,7 @@ for levelName, level in levels.items():
     f = open("./mixed/" + levelName, "w", encoding="latin-1")
     f.write(level)
     f.close()
+
+import shutil
+
+shutil.copyfile("./Created/tiamat.lvl", "./mixed/tiamat.lvl")

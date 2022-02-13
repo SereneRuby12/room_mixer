@@ -1,8 +1,8 @@
 from os import mkdir, listdir
 from os.path import isfile
 import re
-import sys
-sys.stdout = open("log.txt", "w", encoding="latin-1")
+#import sys
+#sys.stdout = open("log.txt", "w", encoding="latin-1")
 
 levels = [
     {
@@ -31,12 +31,6 @@ levels = [
         },
         {
             "file": "cavebossarea.lvl",
-        },
-        {
-            "file": "challenge_moon.lvl",
-        },
-        {
-            "file": "challenge_star.lvl",
         },
         {
             "file": "cityofgold.lvl",
@@ -98,6 +92,9 @@ levels = [
             [
                 {
                     "file": "blackmarket.lvl",
+                },
+                {
+                    "file": "challenge_moon.lvl",
                 }
             ]
         },
@@ -131,6 +128,9 @@ levels = [
                 },
                 {
                     "file": "lakeoffire.lvl",
+                },
+                {
+                    "file": "challenge_star.lvl",
                 }
             ]
         },
@@ -198,6 +198,7 @@ unusedTilecodes.remove("")
 def getUnusedTilecode():
     if len(unusedTilecodes) != 0:
         return unusedTilecodes.pop()
+    print("ERROR, NO TILECODES")
     return False
 
 def replaceTilecodeInRooms(levelStr, shortTilecode, replaceTilecode):
@@ -215,7 +216,6 @@ def replaceTilecodes(str, match, shortTilecode, longTilecode, replaceTilecode=No
     if replaceTilecode is None:
         replaceTilecode = getUnusedTilecode()
         if not replaceTilecode:
-            print("ERROR, NO TILECODES")
             return str
         shortTilecodesMap[replaceTilecode] = longTilecode
         longTilecodesMap[longTilecode] = replaceTilecode
@@ -228,6 +228,8 @@ def replaceTilecodes(str, match, shortTilecode, longTilecode, replaceTilecode=No
     return str
 
 def fixTilecodes(str, inheritedTilecodes, saveTilecodes):
+    lastUTilecode = 257
+    uTilecodesMap = {}
     matches = reTilecodeDefs.finditer(str)
     shortTilecodes = {}
     for match in matches:
@@ -237,23 +239,38 @@ def fixTilecodes(str, inheritedTilecodes, saveTilecodes):
         if longTilecode in longTilecodesMap:
             if shortTilecode != longTilecodesMap[longTilecode]: #if the short tilecode isn't the same
                 print('found longTilecode "' + shortTilecode + '", ' + longTilecode + " | " + "replacing with: ", end="")
-                str = replaceTilecodes(str, match, shortTilecode, longTilecode, longTilecodesMap[longTilecode])
+                uTilecodesMap[chr(lastUTilecode)] = longTilecodesMap[longTilecode]
+                str = replaceTilecodes(str, match, shortTilecode, longTilecode, chr(lastUTilecode))
             else:
-                pass
                 print('found longTilecode with same shortTilecode', shortTilecode, longTilecodesMap[longTilecode])
+                pass
         elif shortTilecode in shortTilecodesMap:
             if longTilecode != shortTilecodesMap[shortTilecode]:
                 print('tilecode "' + shortTilecode + '", ' + longTilecode + '" used with "' + shortTilecodesMap[shortTilecode] + '"', end=" | " )
-                str = replaceTilecodes(str, match, shortTilecode, longTilecode)
+                replaceTilecode = getUnusedTilecode()
+                shortTilecodesMap[replaceTilecode] = longTilecode
+                longTilecodesMap[longTilecode] = replaceTilecode
+
+                uTilecodesMap[chr(lastUTilecode)] = replaceTilecode
+                str = replaceTilecodes(str, match, shortTilecode, longTilecode, chr(lastUTilecode))
         else:
             shortTilecodesMap[shortTilecode] = longTilecode
             longTilecodesMap[longTilecode] = shortTilecode
             unusedTilecodes.remove(shortTilecode)
+            uTilecodesMap[chr(lastUTilecode)] = shortTilecode
+        lastUTilecode += 1
     
     for short, long in inheritedTilecodes.items():
         if not short in shortTilecodes and long in longTilecodesMap and short != longTilecodesMap[long]:
             print("REPLACING INHERIT", short, long, longTilecodesMap[long])
-            str = replaceTilecodeInRooms(str, short, longTilecodesMap[long])
+            uTilecodesMap[chr(lastUTilecode)] = longTilecodesMap[long]
+            str = replaceTilecodeInRooms(str, short, chr(lastUTilecode))
+            lastUTilecode += 1
+    
+    for uTilecode, shortTilecode in uTilecodesMap.items():
+        print("UTILECODE", uTilecode, shortTilecode)
+        str = str.replace(uTilecode, shortTilecode)
+
     if saveTilecodes:
         newTilecodes = {**shortTilecodes, **inheritedTilecodes}
         return str, newTilecodes
@@ -293,7 +310,7 @@ def fixAllFiles():
 def fixAllInList(levelList, inheritedTilecodes = {}):
     for level in levelList:
         filename = level["file"]
-        print("FILENAME", filename, level)
+        #print("FILENAME", filename, level)
         text = readFile(mypath + filename)
         if "contents" in level:
             newFilesText[filename], newTilecodes = fixTilecodes(text, inheritedTilecodes, True)
