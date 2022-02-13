@@ -151,36 +151,6 @@ reRooms = re.compile(r"^(?!(?:\\[-?%+!.])|\/\/)(.+?)(?:(?:\/\/)|$)", flags=re.M)
 reTilecodeDefs = re.compile(r"^\\\?(\S*)[ \t]*?(\S)", flags=re.M)
 reReplaceAllTilecodeDefs = re.compile(r"\\\?[\s\S]*\\\?.*") #find all, to replace with all tilecodes
 
-#UNUSED
-class Tilecode:
-    def __init__(shortTilecode, longTilecode):   
-        self.short = shortTilecode
-        self.long = longTilecode
-
-def getTilecodesOnDependencies(lvlFilename):
-    levelTilecodes = []
-    if lvlFilename in cachedLevelTilecodes:
-        return cachedLevelTilecodes[lvlFilename]
-        pass
-    else:
-        f = open(mypath + lvlFilename, "r", encoding="latin-1")
-        text = f.read()
-        f.close()
-        matches = reTilecodeDefs.finditer(str)
-        for match in matches:
-            longTilecode = match.group(1)
-            shortTilecode = match.group(2)
-            tilecode = Tilecode(shortTilecode, longTilecode)
-            levelTilecodes.append(tilecode)
-        cachedLevelTilecodes[lvlFilename] = levelTilecodes
-        return levelTilecodes
-
-def get_uTilecode(): #unique (or unicode) tilecodes, made so this doesn't do for example, change tilecode 'a' with 'A', but then the tilecode 'A' also has to be changed and it results in wrong tilecodes
-    global lastUTilecode
-    lastUTilecode += 1
-    return chr(lastUTilecode)
-#/UNUSED
-
 mypath = "./Original/"
 #excluded_shorts = [""]
 cachedLevelTilecodes = {}
