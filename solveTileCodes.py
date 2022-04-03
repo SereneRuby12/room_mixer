@@ -1,8 +1,6 @@
 from os import mkdir, listdir
 from os.path import isfile
 import re
-#import sys
-#sys.stdout = open("log.txt", "w", encoding="latin-1")
 
 levels = [
     {
@@ -189,11 +187,9 @@ def replaceTilecodes(str, match, shortTilecode, longTilecode, replaceTilecode=No
             return str
         shortTilecodesMap[replaceTilecode] = longTilecode
         longTilecodesMap[longTilecode] = replaceTilecode
-    print(shortTilecode, replaceTilecode)
+    print(replaceTilecode)
     pos, _ = match.span(2)
-    #print(pos)
     str = str[:pos] + replaceTilecode + str[pos+1:]
-    #roomsget = "\/\/ room(?:\n\\!.*)?\n*([\s\S]*?)\n(?:\n|$)"
     str = replaceTilecodeInRooms(str, shortTilecode, replaceTilecode)
     return str
 
@@ -247,7 +243,6 @@ def fixTilecodes(str, inheritedTilecodes, saveTilecodes):
     return str, shortTilecodes
 
 def replaceWithAllFoundTilecodes(level, newTilecodesStr):
-    print("\n\n\n", level, newTilecodesStr)
     return reReplaceAllTilecodeDefs.sub(newTilecodesStr, level)
 
 def readFile(filePath):
@@ -262,25 +257,11 @@ except OSError as error:
     print(error)
 
 newFilesText = {}
-#print(listdir(mypath))
-
-#not used
-def fixAllFiles():
-    files = [f for f in listdir(mypath) if ".lvl" in f]
-    for filename in files:
-        print("FILE ", filename)
-        text = readFile(mypath + filename)
-        newFilesText[filename] = fixTilecodes(text)
-        #f = open(mypath + filename, "r", encoding="latin-1")
-        #text = f.read()
-        #newFilesText[filename] = fixTilecodes(text)
-        #f.close()
-#fixAllFiles()
 
 def fixAllInList(levelList, inheritedTilecodes = {}):
     for level in levelList:
         filename = level["file"]
-        #print("FILENAME", filename, level)
+        print("FILENAME", filename)
         text = readFile(mypath + filename)
         if "contents" in level:
             newFilesText[filename], newTilecodes = fixTilecodes(text, inheritedTilecodes, True)
@@ -296,8 +277,6 @@ def getShortTilecodesStr():
     return text
 
 allTileCodesText = getShortTilecodesStr()
-print(allTileCodesText)#shortTilecodesMap)
-#print("newFilesText", newFilesText)
 for filename, newText in newFilesText.items():
     newText = replaceWithAllFoundTilecodes(newText, allTileCodesText)
     f = open("./Created/" + filename, "w", encoding="latin-1")
