@@ -1,10 +1,9 @@
 from os import mkdir, listdir
-from os.path import isfile
 from enum import IntEnum
 import re
-mypath = "./Created/"
-reTemplates = re.compile(r"\\\.([^\s\n/]*).*\n\/*\n\n([\s\S]*?)(?:(?:\/\/\/)|$)")#(r"\\\.([^\s\n/]*).*\n\/*\n[\s\S]*?(?:(?:\/\/\/)|$)")
-reRooms = re.compile(r"\n*((?:\\!.*\n)*)\n*([\s\S]*?)\n(?:\n|$)")#(r"(\\!.*\n)*\n*([\s\S]*?)\n(?:\n|$)")#(r"\/\/ room(?:\n\\!.*)*\n*([\s\S]*?)\n(?:\n|$)")
+inPath = "./Created/"
+reTemplates = re.compile(r"\\\.([^\s\n/]*).*\n\/*\n\n([\s\S]*?)(?:(?:\/\/\/)|$)")
+reRooms = re.compile(r"\n*((?:\\!.*\n)*)\n*([\s\S]*?)\n(?:\n|$)")
 templates = []
 templatesAllStr = {}
 filesDict = {}
@@ -80,60 +79,19 @@ def getTemplateRooms(level, filename):
                 else:
                     templates[ROOM_TYPE.NORMAL][templateName].append(room)
 
-#files = [f for f in listdir('.') if isfile(f) and ".lvl" in f]
-files = [f for f in listdir(mypath) if ".lvl" in f]
+files = [f for f in listdir(inPath) if ".lvl" in f]
 
 for filename in files:
     print("FILE ", filename)
-    f = open(mypath + filename, "r", encoding="latin-1")
+    f = open(inPath + filename, "r", encoding="latin-1")
     lvl = f.read()
     getTemplateRooms(lvl, filename)
     filesDict[filename] = lvl
     f.close()
 
-tryMakeDir("./Templates")
-
-##print(templates)
-
-#start1 = ""
-#start2 = ""
-#roomStart = "\n"
-#roomEnd = "\n"
-#end = ""
-file_ext = "lua"
-
-def exportMixedTemplate():
-    text = ""
-    start1 =  "local rooms_"
-    start2 =  " = {"
-    roomStart = "\n[["
-    roomEnd = "]],"
-    end = "\n}\nreturn rooms_"
-    for template_name, rooms in templates.items():
-        #print(template_name)
-        template_name = template_name.upper()
-        template_text = ""
-        #text += "\n" + template_name + " = {"
-        template_text += start1 + template_name + start2
-        for room in rooms:
-            #print(room)
-            #text += "\n[[" + room + "]],"
-            template_text += roomStart + room + roomEnd
-        template_text += end + template_name
-        f = open("./Templates/TEMPLATES_" + template_name + "." + file_ext, "w", encoding="latin-1")
-        f.write(template_text)
-        text += template_text
-    #print(text, templates)
-    f = open("./TEMPLATES_GENERATED.txt", "w", encoding="latin-1")
-    #writing = f"{templates}"
-    f.write(text)
-    f.close()
-#exportMixedTemplate()
-
 def changeLevelTemplate(level, templateName, roomsStr):
     roomsStr = "\." + templateName + "\n" + templateSeparator + "\n\n" + roomsStr + "\n\n"
     level = re.sub(r"\\\.(" + templateName + r"\b).*\n\/*\n\n([\s\S]*?)(?:(?:\/\/\/)|$)", roomsStr, level)
-    #print(level)
     return level
 
 tryMakeDir("./mixed")
