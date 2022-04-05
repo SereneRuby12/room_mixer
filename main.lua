@@ -115,7 +115,6 @@ local function pre_floor_callback(_, x, y, l)
         end
         if template == ROOM_TEMPLATE.PATH_NOTOP or template == ROOM_TEMPLATE.PATH_DROP_NOTOP or template == ROOM_TEMPLATE.EXIT_NOTOP then
             if (x % 10 == 2 or hasnt_open_path_next(x, y+1)) and hasnt_open_path_prev(x, y+1) then
-                messpect(x, y, y%8)
                 return spawn_grid_entity(ENT_TYPE.FX_SHADOW, x, y, l)
             end
         end
@@ -131,7 +130,6 @@ set_callback(function ()
             spawned_floors[y] = {}
         end
         if pre_floor_cb_id == -1 then
-            messpect("set_cb", pre_floor_cb_id)
             pre_floor_cb_id = set_pre_entity_spawn(pre_floor_callback, SPAWN_TYPE.LEVEL_GEN, MASK.FLOOR, FLOORS)
         end
     else
