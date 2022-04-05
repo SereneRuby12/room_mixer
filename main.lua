@@ -138,10 +138,6 @@ set_callback(function ()
     end
 end, ON.POST_ROOM_GENERATION)
 
-register_console_command("get_spawned_floors", function ()
-    return spawned_floors
-end)
-
 register_option_bool("fix_path", "Fix blocked paths", "Won't fix every blocked path, only path_drop (the most common one)", true)
 register_option_bool("grow_growables", "grow growable entities", "fixes vines, poles and chains not growing when not on the themes where they originally spawn", true)
 register_option_bool("fix_spike_textures", "Fix spike textures", "Spikes on bones and upside down spikes have incorrect textures when out of their respective themes", true)
