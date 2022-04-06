@@ -30,6 +30,7 @@ toChangeTemplates = [
     "chunk_door"
 ]
 sunkenExitsNotop = []
+eggplantExits = []
 
 class ROOM_TYPE(IntEnum):
     NORMAL = 0
@@ -67,6 +68,10 @@ def getTemplateRooms(level, filename):
             for roomMatch in roomMatches:
                 room = roomMatch.group(1) + roomMatch.group(2)
                 sunkenExitsNotop.append(room)
+        elif filename == "eggplantarea.lvl" and "exit" in templateName:
+            for roomMatch in roomMatches:
+                room = roomMatch.group(1) + roomMatch.group(2)
+                eggplantExits.append(room)
         else:
             for roomMatch in roomMatches:
                 #print(roomMatch)
@@ -104,6 +109,7 @@ for filename, level in filesDict.items():
     if filename == "tiamat.lvl":
         continue
     isSunkenLevel = "sunken" in filename or filename == "hundun.lvl"
+    isEggplantLevel = filename == "eggplantarea.lvl"
     if filename != "generic.lvl":
         if not ("\\.chunk_air" in level):
             level += f"\n{templateSeparator}\n\\.chunk_air\n{templateSeparator}\n\n"
@@ -113,16 +119,18 @@ for filename, level in filesDict.items():
             level += f"\n{templateSeparator}\n\\.chunk_door\n{templateSeparator}\n\n"
     for templateName in toChangeTemplates:
         templateRooms = []
-        if templateName == "exit_notop" and isSunkenLevel:
+        if isSunkenLevel and templateName == "exit_notop":
             templateRooms.extend(sunkenExitsNotop)
+        elif isEggplantLevel and "exit" in templateName:
+            templateRooms.extend(eggplantExits)
         else:
             templateRooms.extend(templates[ROOM_TYPE.NORMAL][templateName])
         if isSunkenLevel:
             templateRooms.extend(templates[ROOM_TYPE.INVERSE_LIQUID][templateName])
-        elif filename != "icecavesarea.lvl":
+        elif filename != "icecavesarea.lvl" and templateName != "entrance"  and templateName != "entrance_drop":
             templateRooms.extend(templates[ROOM_TYPE.LIQUID][templateName])
-        
-        if not ("cosmicocean" in filename or "duat" in filename):
+
+        if not ("cosmicocean" in filename or "duat" in filename or filename == "hundun.lvl"):
             templateRooms.extend(templates[ROOM_TYPE.DUAL][templateName])
         level = changeLevelTemplate(level, templateName, "\n\n".join(templateRooms))
     f = open("./mixed/" + filename, "w", encoding="latin-1")
