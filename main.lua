@@ -4,6 +4,20 @@ meta.author = "Estebanfer"
 meta.version = "1.0"
 
 local pre_floor_cb_id = -1
+
+local NOTOP_TEMPLATES = {
+    [ROOM_TEMPLATE.PATH_NOTOP] = true,
+    [ROOM_TEMPLATE.PATH_DROP_NOTOP] = true,
+    [ROOM_TEMPLATE.EXIT_NOTOP] = true,
+    [ROOM_TEMPLATE.MACHINE_TALLROOM_PATH] = true,
+    [ROOM_TEMPLATE.MACHINE_BIGROOM_PATH] = true,
+    [ROOM_TEMPLATE.ANUBIS_ROOM] = true,
+    [ROOM_TEMPLATE.MOAI] = true,
+    [ROOM_TEMPLATE.TUSKFRONTDICESHOP_LEFT] = true,
+    [ROOM_TEMPLATE.TUSKFRONTDICESHOP] = true,
+    [ROOM_TEMPLATE.FEELING_TOMB] = true,
+}
+
 local FLOORS = {ENT_TYPE.FLOOR_GENERIC, ENT_TYPE.FLOOR_SURFACE, ENT_TYPE.FLOOR_JUNGLE, ENT_TYPE.FLOOR_TUNNEL_CURRENT, ENT_TYPE.FLOOR_TUNNEL_NEXT, ENT_TYPE.FLOOR_PEN, ENT_TYPE.FLOOR_TOMB, ENT_TYPE.FLOORSTYLED_BABYLON, ENT_TYPE.FLOORSTYLED_BEEHIVE, ENT_TYPE.FLOORSTYLED_COG, ENT_TYPE.FLOORSTYLED_DUAT, ENT_TYPE.FLOORSTYLED_GUTS, ENT_TYPE.FLOORSTYLED_MINEWOOD, ENT_TYPE.FLOORSTYLED_MOTHERSHIP, ENT_TYPE.FLOORSTYLED_PAGODA, ENT_TYPE.FLOORSTYLED_STONE, ENT_TYPE.FLOORSTYLED_SUNKEN, ENT_TYPE.FLOORSTYLED_TEMPLE, ENT_TYPE.FLOORSTYLED_VLAD}
 
 local TEXTURE_BY_THEME = {
@@ -55,7 +69,7 @@ set_callback(function ()
                 end
             end
         end
-        if state.theme == THEME.DWELLING or (is_co and co_theme ~= COSUBTHEME.ICE_CAVES) then
+        if state.theme ~= THEME.ICE_CAVES or (is_co and co_theme ~= COSUBTHEME.ICE_CAVES) then
             for _, spike_uid in ipairs(get_entities_by(ENT_TYPE.FLOOR_SPIKES_UPSIDEDOWN, MASK.FLOOR, LAYER.BOTH)) do
                 local x, y, l = get_position(spike_uid)
                 local floor_uid = get_grid_entity_at(x, y+1, l)
@@ -74,6 +88,13 @@ set_callback(function ()
                     spike.animation_frame = spike.animation_frame - 3
                     spike.angle = math.pi
                 end
+            end
+        end
+    end
+    if options.fix_quicksand_deco then
+        for _, uid in ipairs(get_entities_by(ENT_TYPE.FLOOR_QUICKSAND, MASK.FLOOR, LAYER.BOTH)) do
+            for _, deco_uid in ipairs(entity_get_items_by(uid, ENT_TYPE.DECORATION_GENERIC, MASK.DECORATION)) do
+                get_entity(deco_uid):set_texture(TEXTURE.DATA_TEXTURES_FLOOR_TEMPLE_0)
             end
         end
     end
@@ -113,7 +134,7 @@ local function pre_floor_callback(_, x, y, l)
             local ix, iy = get_room_index(x, y)
             template = get_room_template(ix, iy, LAYER.FRONT)
         end
-        if template == ROOM_TEMPLATE.PATH_NOTOP or template == ROOM_TEMPLATE.PATH_DROP_NOTOP or template == ROOM_TEMPLATE.EXIT_NOTOP then
+        if NOTOP_TEMPLATES[template] then
             if (x % 10 == 2 or hasnt_open_path_next(x, y+1)) and hasnt_open_path_prev(x, y+1) then
                 return spawn_grid_entity(ENT_TYPE.FX_SHADOW, x, y, l)
             end
@@ -141,3 +162,4 @@ end, ON.POST_ROOM_GENERATION)
 register_option_bool("fix_path", "Fix blocked paths", "Won't fix every blocked path, only path_drop (the most common one)", true)
 register_option_bool("grow_growables", "Grow growable entities", "Fixes vines, poles and chains not growing when not on the themes where they originally spawn", true)
 register_option_bool("fix_spike_textures", "Fix spike textures", "Spikes on bones and upside down spikes have incorrect textures when out of their respective themes", true)
+register_option_bool("fix_quicksand_deco", "Fix quicksand textures", "Won't fix the textures when one becomes destroyed, only on level gen", true)
