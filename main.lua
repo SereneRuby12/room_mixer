@@ -1,7 +1,10 @@
 meta.name = "Room Mixer"
 meta.description = "Mixes rooms from every level.\nDisable some of the options below in case of getting crashes while playing online."
-meta.author = "Estebanfer"
-meta.version = "1.0"
+meta.author = "SereneRuby12"
+meta.version = "1.0a"
+
+state = nil
+---@cast state nil
 
 local pre_floor_cb_id = -1
 
@@ -45,6 +48,7 @@ local TEXTURE_BY_SUBTHEME = {
 local DEFAULT_TEXTURE = TEXTURE.DATA_TEXTURES_FLOOR_TEMPLE_0
 
 local function get_theme_texture()
+    local state = get_local_state()
     if state.theme == THEME.COSMIC_OCEAN then
         return TEXTURE_BY_SUBTHEME[get_co_subtheme()] or DEFAULT_TEXTURE
     else
@@ -58,6 +62,7 @@ set_callback(function ()
         grow_poles(LAYER.BOTH, 120)
         grow_vines(LAYER.BOTH, 120)
     end
+    local state = get_local_state()
     if options.fix_spike_textures then
         local co_theme = get_co_subtheme()
         local is_co = co_theme > COSUBTHEME.NONE
@@ -146,6 +151,7 @@ end
 
 set_callback(function ()
     if options.fix_path then
+        local state = get_local_state()
         spawned_floors = {}
         for y = 122-state.height*8, 123 do
             spawned_floors[y] = {}
